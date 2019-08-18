@@ -1,0 +1,36 @@
+##!/usr/bin/env python3
+# Requires PyAudio and PySpeech.
+import win32com.client as wincl
+from typing import Any, Union
+from win32com.client.dynamic import CDispatch
+
+speak: Union[CDispatch, Any] = wincl.Dispatch("SAPI.SpVoice")
+import speech_recognition as sr
+
+import wikipedia
+import wolframalpha
+
+# Record Audio
+r = sr.Recognizer()
+with sr.Microphone() as source:
+    speak.Speak("What do you want to know")
+    print("Speak now")
+    audio = r.listen(source)
+
+try:
+    # wolframalpha
+    app_id = "XXXXXXXXXXXXX" # replace XXXXXXXXXX with WolframAlpha app ID code here
+    client = wolframalpha.Client(app_id)
+    res = client.query(r.recognize_google(audio))
+    answer = next(res.results).text
+    print ("WolframAlpha: " + answer)
+    speak.Speak("The answer to your question....  " + r.recognize_google(audio) + (" is....  ") + answer )
+
+except:
+    try:
+        print("Wikipedia:")
+        print(wikipedia.summary(r.recognize_google(audio),sentences=2))
+        speak.Speak("The answer to your question.... " + r.recognize_google(audio) + (" is.... ") + wikipedia.summary(r.recognize_google(audio),sentences=2))
+    except:
+        speak.Speak("I'm sorry but I do not have any information about this question")
+
